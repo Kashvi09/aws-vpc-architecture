@@ -15,4 +15,4 @@
 - A route table isn't a security boundary by itself — even a misconfigured 0.0.0.0/0 → IGW route on a "private" subnet wouldn't expose an instance unless it also had a public IP and a security group allowing the traffic. Real protection comes from multiple independent layers, not one.
 
 **Screenshots**
-![VPC resource map](../screenshots/milestone-1/vpc-resource-map.png)
+![VPC resource map](../../screenshots/milestone-1/vpc-resource-map.png)
