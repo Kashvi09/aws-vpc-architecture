@@ -12,4 +12,4 @@
 - NAT Gateway only allows one-way, outbound-initiated connections — no inbound connection can be established through it, regardless of route tables or security groups. An Internet Gateway, by contrast, allows bidirectional traffic if routing, public IP, and security groups all permit it. This directional difference — not just "one is for private, one is for public" — is the real reason NAT is the correct choice here.
 
 **Screenshots**
-![Route table with NAT route](../screenshots/milestone-2/private-route-table-nat.png)
+![Route table with NAT route](../../screenshots/milestone-2/private-route-table-nat.png)

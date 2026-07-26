@@ -15,9 +15,6 @@ Beyond the working architecture, this project is a hands-on exploration of VPC/s
 ## AWS Services Used
 | Service | Purpose |
 |---|---|
-## AWS Services Used
-| Service | Purpose |
-|---|---|
 | VPC | Custom-CIDR (10.0.0.0/16) isolated network for this project |
 | Subnets | 2 public (10.0.0.0/24, 10.0.1.0/24) + 2 private (10.0.10.0/24, 10.0.11.0/24), spread across ap-south-1a and ap-south-1b for AZ redundancy |
 | Internet Gateway | Attached to the VPC; provides the internet route used by public subnets |
