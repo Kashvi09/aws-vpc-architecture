@@ -20,6 +20,10 @@ Beyond the working architecture, this project is a hands-on exploration of VPC/s
 | Internet Gateway | Attached to the VPC; provides the internet route used by public subnets |
 | Route Tables | public-route-table (0.0.0.0/0 → IGW, associated with public subnets); private-route-table (local-only, no internet route, associated with private subnets) |
 | NAT Gateway | Provides outbound-only internet access for private subnets, sitting in a public subnet; paired with an Elastic IP |
+| Security Groups | alb-sg (allows inbound HTTP from internet); ec2-sg (allows inbound HTTP only from alb-sg) |
+| IAM Role | ec2-ssm-role — grants EC2 instances permission to be managed via SSM Session Manager |
+| Launch Template | Blueprint for EC2 instances — Amazon Linux 2023, t2.micro/t3.micro, ec2-sg, ec2-ssm-role, user data installs Apache |
+| Auto Scaling Group | vpc-architecture-asg — spans both private subnets, desired 1 / min 1 / max 2 |
 
 ## Cost Breakdown
 Every resource in this project stays within AWS's free tier. Full per-resource breakdown → [`docs/cost-breakdown.md`](./docs/cost-breakdown.md)
@@ -28,6 +32,7 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 |---|---|---|
 | Networking foundation | VPC, subnets, route tables, Internet Gateway | $0 |
 | Outbound connectivity | NAT Gateway + Elastic IP | ~$0.045/hr + ~$0.045/GB processed while running; **not free-tier** — deleted between sessions to avoid ongoing charges |
+| Compute | EC2 (via ASG), Launch Template, Security Groups, IAM Role | $0 while within free-tier 12-month window (750 hrs/month t2.micro/t3.micro combined); keep desired capacity low (1-2) to control hours used |
 
 ## Setup / Deployment Guide
 
@@ -37,6 +42,7 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 
 - [Milestone 1: VPC Foundation — CIDR, Subnets, Internet Gateway, Route Tables](./docs/milestones/milestone-1-vpc-foundation.md)
 - [Milestone 2: NAT Gateway — Outbound Internet for Private Subnets](./docs/milestones/milestone-2-nat-gateway.md)
+- [Milestone 3: EC2 + Auto Scaling Group (Private Subnets)](./docs/milestones/milestone-3-ec2-asg.md)
 
 ## Known Limitations
 
