@@ -24,6 +24,8 @@ Beyond the working architecture, this project is a hands-on exploration of VPC/s
 | IAM Role | ec2-ssm-role — grants EC2 instances permission to be managed via SSM Session Manager |
 | Launch Template | Blueprint for EC2 instances — Amazon Linux 2023, t2.micro/t3.micro, ec2-sg, ec2-ssm-role, user data installs Apache |
 | Auto Scaling Group | vpc-architecture-asg — spans both private subnets, desired 1 / min 1 / max 2 |
+| Target Group | vpc-architecture-tg — HTTP:80, health check path `/`, registered EC2 targets from the ASG |
+| Application Load Balancer | vpc-architecture-alb — internet-facing, spans both public subnets, alb-sg attached, HTTP:80 listener forwarding to the target group |
 
 ## Cost Breakdown
 Every resource in this project stays within AWS's free tier. Full per-resource breakdown → [`docs/cost-breakdown.md`](./docs/cost-breakdown.md)
@@ -33,6 +35,7 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 | Networking foundation | VPC, subnets, route tables, Internet Gateway | $0 |
 | Outbound connectivity | NAT Gateway + Elastic IP | ~$0.045/hr + ~$0.045/GB processed while running; **not free-tier** — deleted between sessions to avoid ongoing charges |
 | Compute | EC2 (via ASG), Launch Template, Security Groups, IAM Role | $0 while within free-tier 12-month window (750 hrs/month t2.micro/t3.micro combined); keep desired capacity low (1-2) to control hours used |
+| Load balancing | Application Load Balancer, Target Group | ~$0.0225/hr (~$16/month if left running) + negligible LCU charge at test volume; **not free-tier** — delete between sessions unless moving straight into next milestone |
 
 ## Setup / Deployment Guide
 
@@ -43,6 +46,7 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 - [Milestone 1: VPC Foundation — CIDR, Subnets, Internet Gateway, Route Tables](./docs/milestones/milestone-1-vpc-foundation.md)
 - [Milestone 2: NAT Gateway — Outbound Internet for Private Subnets](./docs/milestones/milestone-2-nat-gateway.md)
 - [Milestone 3: EC2 + Auto Scaling Group (Private Subnets)](./docs/milestones/milestone-3-ec2-asg.md)
+- [Milestone 4: Application Load Balancer](./docs/milestones/milestone-4-alb.md)
 
 ## Known Limitations
 

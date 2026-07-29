@@ -12,3 +12,5 @@
 | Security Groups (alb-sg, ec2-sg) | Instance-level firewall rules | Yes — always free | $0 | No — free regardless of duration |
 | IAM Role (ec2-ssm-role) | Grants EC2 permission for SSM Session Manager | Yes — always free | $0 | No — free regardless of duration |
 | Launch Template | Blueprint for EC2 launch config | Yes — always free | $0 | No — free regardless of duration |
+| Application Load Balancer | Distributes internet traffic to EC2 targets across AZs | No — billed hourly + per LCU | ~$0.0225/hr + LCU (negligible at test volume) | Yes — delete after each session unless actively moving into next milestone |
+| Target Group | Tracks EC2 targets + health status for the ALB | Yes — always free | $0 | No — free regardless of duration (deleted automatically as part of ALB teardown if you choose to, or can be left) |
