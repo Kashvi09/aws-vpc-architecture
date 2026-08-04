@@ -14,3 +14,5 @@
 | Launch Template | Blueprint for EC2 launch config | Yes — always free | $0 | No — free regardless of duration |
 | Application Load Balancer | Distributes internet traffic to EC2 targets across AZs | No — billed hourly + per LCU | ~$0.0225/hr + LCU (negligible at test volume) | Yes — delete after each session unless actively moving into next milestone |
 | Target Group | Tracks EC2 targets + health status for the ALB | Yes — always free | $0 | No — free regardless of duration (deleted automatically as part of ALB teardown if you choose to, or can be left) |
+| Target Tracking Scaling Policy | Automatically adjusts ASG capacity based on CPU | Yes — always free | $0 | No — free regardless of duration |
+| CloudWatch Alarms (x3) | Alerts on high/low CPU and ALB 5xx errors | Yes — free tier covers first 10 alarms | $0 | No — free regardless of duration |

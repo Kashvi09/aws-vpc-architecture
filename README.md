@@ -12,6 +12,10 @@ Beyond the working architecture, this project is a hands-on exploration of VPC/s
 
 ## Architecture
 
+## Infrastructure as Code
+The entire architecture is defined in `infrastructure/template.yaml` and deployed via:
+`aws cloudformation deploy --template-file infrastructure/template.yaml --stack-name vpc-architecture-stack --capabilities CAPABILITY_NAMED_IAM`
+
 ## AWS Services Used
 | Service | Purpose |
 |---|---|
@@ -26,6 +30,8 @@ Beyond the working architecture, this project is a hands-on exploration of VPC/s
 | Auto Scaling Group | vpc-architecture-asg — spans both private subnets, desired 1 / min 1 / max 2 |
 | Target Group | vpc-architecture-tg — HTTP:80, health check path `/`, registered EC2 targets from the ASG |
 | Application Load Balancer | vpc-architecture-alb — internet-facing, spans both public subnets, alb-sg attached, HTTP:80 listener forwarding to the target group |
+| Auto Scaling Policy | Target tracking on Average CPU Utilization, target 50% — automatically scales the ASG based on real load instead of a fixed capacity |
+| CloudWatch Alarms | alb-5xx-alarm (custom, on HTTPCode_ELB_5XX_Count); AlarmHigh/AlarmLow (auto-created by the target tracking policy) |
 
 ## Cost Breakdown
 Every resource in this project stays within AWS's free tier. Full per-resource breakdown → [`docs/cost-breakdown.md`](./docs/cost-breakdown.md)
@@ -36,6 +42,7 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 | Outbound connectivity | NAT Gateway + Elastic IP | ~$0.045/hr + ~$0.045/GB processed while running; **not free-tier** — deleted between sessions to avoid ongoing charges |
 | Compute | EC2 (via ASG), Launch Template, Security Groups, IAM Role | $0 while within free-tier 12-month window (750 hrs/month t2.micro/t3.micro combined); keep desired capacity low (1-2) to control hours used |
 | Load balancing | Application Load Balancer, Target Group | ~$0.0225/hr (~$16/month if left running) + negligible LCU charge at test volume; **not free-tier** — delete between sessions unless moving straight into next milestone |
+| Scaling & monitoring | Target tracking scaling policy, CloudWatch alarms | $0 — scaling policy is free; alarms are free tier eligible (well within the 10 free-tier alarm limit) |
 
 ## Setup / Deployment Guide
 
@@ -47,6 +54,8 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 - [Milestone 2: NAT Gateway — Outbound Internet for Private Subnets](./docs/milestones/milestone-2-nat-gateway.md)
 - [Milestone 3: EC2 + Auto Scaling Group (Private Subnets)](./docs/milestones/milestone-3-ec2-asg.md)
 - [Milestone 4: Application Load Balancer](./docs/milestones/milestone-4-alb.md)
+- [Milestone 5: Auto Scaling Policies + CloudWatch Monitoring](./docs/milestones/milestone-5-scaling-monitoring.md)
+- [Milestone 6: CloudFormation Rewrite (Infrastructure as Code)](./docs/milestones/milestone-6-cloudformation.md)
 
 ## Known Limitations
 
