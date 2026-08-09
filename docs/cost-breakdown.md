@@ -16,3 +16,6 @@
 | Target Group | Tracks EC2 targets + health status for the ALB | Yes — always free | $0 | No — free regardless of duration (deleted automatically as part of ALB teardown if you choose to, or can be left) |
 | Target Tracking Scaling Policy | Automatically adjusts ASG capacity based on CPU | Yes — always free | $0 | No — free regardless of duration |
 | CloudWatch Alarms (x3) | Alerts on high/low CPU and ALB 5xx errors | Yes — free tier covers first 10 alarms | $0 | No — free regardless of duration |
+| CloudFormation (stack management) | Orchestrates creation/deletion of all project resources as one unit | Yes — always free, no charge for the service itself | $0 | No — the stack itself has no cost; deleting it via `delete-stack` removes all underlying billed resources cleanly, which is the actual cost-control benefit of this milestone |
+| IAM User (github-actions-deployer-vpc) | CI/CD identity used by GitHub Actions to deploy the stack | Yes — always free | $0 | No — free regardless of duration; keep the user, only rotate/revoke its access key if compromised |
+| GitHub Actions | Automates `aws cloudformation deploy` on push to main | Yes — free for this repo (public repo minutes) | $0 | No — nothing to delete; the workflow file stays in the repo permanently |

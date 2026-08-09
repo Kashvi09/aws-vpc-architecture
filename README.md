@@ -32,6 +32,9 @@ The entire architecture is defined in `infrastructure/template.yaml` and deploye
 | Application Load Balancer | vpc-architecture-alb — internet-facing, spans both public subnets, alb-sg attached, HTTP:80 listener forwarding to the target group |
 | Auto Scaling Policy | Target tracking on Average CPU Utilization, target 50% — automatically scales the ASG based on real load instead of a fixed capacity |
 | CloudWatch Alarms | alb-5xx-alarm (custom, on HTTPCode_ELB_5XX_Count); AlarmHigh/AlarmLow (auto-created by the target tracking policy) |
+| CloudFormation Template | infrastructure/template.yaml — defines the entire architecture (~15+ resources) as code; deployed via `aws cloudformation deploy` |
+| IAM User (github-actions-deployer-vpc) | Scoped CI/CD identity used by GitHub Actions to deploy the CloudFormation stack |
+| GitHub Actions | Automates `aws cloudformation deploy` on push to main, scoped to changes in infrastructure/template.yaml |
 
 ## Cost Breakdown
 Every resource in this project stays within AWS's free tier. Full per-resource breakdown → [`docs/cost-breakdown.md`](./docs/cost-breakdown.md)
@@ -43,6 +46,8 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 | Compute | EC2 (via ASG), Launch Template, Security Groups, IAM Role | $0 while within free-tier 12-month window (750 hrs/month t2.micro/t3.micro combined); keep desired capacity low (1-2) to control hours used |
 | Load balancing | Application Load Balancer, Target Group | ~$0.0225/hr (~$16/month if left running) + negligible LCU charge at test volume; **not free-tier** — delete between sessions unless moving straight into next milestone |
 | Scaling & monitoring | Target tracking scaling policy, CloudWatch alarms | $0 — scaling policy is free; alarms are free tier eligible (well within the 10 free-tier alarm limit) |
+| Infrastructure as Code | CloudFormation | $0 — no charge for the CloudFormation service itself; only the underlying resources it creates are billed, same as their individual costs listed above |
+| CI/CD | GitHub Actions, IAM deploy user | $0 — GitHub Actions is free for this repo; IAM user has no cost |
 
 ## Setup / Deployment Guide
 
@@ -56,8 +61,10 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 - [Milestone 4: Application Load Balancer](./docs/milestones/milestone-4-alb.md)
 - [Milestone 5: Auto Scaling Policies + CloudWatch Monitoring](./docs/milestones/milestone-5-scaling-monitoring.md)
 - [Milestone 6: CloudFormation Rewrite (Infrastructure as Code)](./docs/milestones/milestone-6-cloudformation.md)
+- [Milestone 7: CI/CD via GitHub Actions](./docs/milestones/milestone-7-github-actions.md)
 
 ## Known Limitations
+- github-actions-deployer-vpc uses broad managed policies (especially IAMFullAccess, the widest one) rather than scoped custom policies
 
 ## Future Improvements
 

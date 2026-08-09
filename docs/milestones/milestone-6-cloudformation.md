@@ -12,6 +12,6 @@
 - Resources referencing each other via `!Ref` inside the same template (like the ASG pointing at the target group) always resolve to whatever currently exists in that stack — unlike manually copying an ID between console screens, there's no way for the reference to go stale, which is exactly what caused the Milestone 4 outage.
 
 **Screenshots**
-![CloudFormation stack showing CREATE_COMPLETE status after successful deployment](../../screenshots/milestone-6/cloudformation-stack-create-complete.png)
+![CloudFormation stack showing CREATE_COMPLETE status after successful deployment](../../screenshots/milestone%206/cloudformation-stack-create-complete.png)
 
-![CloudFormation stack Resources tab showing the AWS resources created by the deployment](../../screenshots/milestone-6/cloudformation-stack-resources.png)
+![CloudFormation stack Resources tab showing the AWS resources created by the deployment](../../screenshots/milestone%206/cloudformation-stack-resources.png)
