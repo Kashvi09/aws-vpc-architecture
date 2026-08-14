@@ -35,6 +35,9 @@ The entire architecture is defined in `infrastructure/template.yaml` and deploye
 | CloudFormation Template | infrastructure/template.yaml — defines the entire architecture (~15+ resources) as code; deployed via `aws cloudformation deploy` |
 | IAM User (github-actions-deployer-vpc) | Scoped CI/CD identity used by GitHub Actions to deploy the CloudFormation stack |
 | GitHub Actions | Automates `aws cloudformation deploy` on push to main, scoped to changes in infrastructure/template.yaml |
+| CloudWatch Log Group | /vpc/vpc-architecture-flow-logs — 1-day retention, receives VPC Flow Log entries |
+| IAM Role (vpc-flow-logs-role) | Custom-scoped policy allowing the VPC Flow Logs service to write to the specific log group |
+| VPC Flow Log | vpc-architecture-flow-log — VPC-wide scope, captures ALL traffic (accept + reject) to CloudWatch Logs |
 
 ## Cost Breakdown
 Every resource in this project stays within AWS's free tier. Full per-resource breakdown → [`docs/cost-breakdown.md`](./docs/cost-breakdown.md)
@@ -48,6 +51,7 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 | Scaling & monitoring | Target tracking scaling policy, CloudWatch alarms | $0 — scaling policy is free; alarms are free tier eligible (well within the 10 free-tier alarm limit) |
 | Infrastructure as Code | CloudFormation | $0 — no charge for the CloudFormation service itself; only the underlying resources it creates are billed, same as their individual costs listed above |
 | CI/CD | GitHub Actions, IAM deploy user | $0 — GitHub Actions is free for this repo; IAM user has no cost |
+| Network audit logging | VPC Flow Logs, CloudWatch Log Group | Negligible — CloudWatch Logs ingestion (~$0.50-0.76/GB) + storage (~$0.03/GB/month), effectively <$0.01 at test traffic volume; 1-day retention keeps storage from accumulating |
 
 ## Setup / Deployment Guide
 
@@ -62,6 +66,7 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 - [Milestone 5: Auto Scaling Policies + CloudWatch Monitoring](./docs/milestones/milestone-5-scaling-monitoring.md)
 - [Milestone 6: CloudFormation Rewrite (Infrastructure as Code)](./docs/milestones/milestone-6-cloudformation.md)
 - [Milestone 7: CI/CD via GitHub Actions](./docs/milestones/milestone-7-github-actions.md)
+- [Milestone 8: VPC Flow Logs](./docs/milestones/milestone-8-vpc-flow-logs.md)
 
 ## Known Limitations
 - github-actions-deployer-vpc uses broad managed policies (especially IAMFullAccess, the widest one) rather than scoped custom policies
