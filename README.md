@@ -1,7 +1,7 @@
 # aws-vpc-architecture
 # Multi-Tier VPC Architecture
 
-> Status: 🚧 In Progress
+> Status: ✅ Complete
 
 ## Overview
 This project is a multi-tier network architecture on AWS, built to demonstrate deep-networking skills that a serverless project doesn't touch — public/private subnet design, secure routing, load balancing, and auto-scaling.
@@ -11,6 +11,9 @@ An Application Load Balancer sits in public subnets and receives internet traffi
 Beyond the working architecture, this project is a hands-on exploration of VPC/subnet design, NAT gateways, security groups vs. NACLs, load balancing, and auto-scaling — including real issues encountered and resolved along the way.
 
 ## Architecture
+![VPC architecture](./diagrams/architecture-diagram.svg)
+
+Internet traffic enters through the Internet Gateway into the public subnets, where the Application Load Balancer distributes it to EC2 instances in the private subnets via a target group. The Auto Scaling Group manages instance count based on CPU load, while a NAT Gateway provides outbound-only internet access for the private instances. VPC Flow Logs, CloudWatch alarms, and SNS notifications provide visibility across the whole architecture.
 
 ## Infrastructure as Code
 The entire architecture is defined in `infrastructure/template.yaml` and deployed via:
@@ -55,6 +58,62 @@ Every resource in this project stays within AWS's free tier. Full per-resource b
 
 ## Setup / Deployment Guide
 
+### Prerequisites
+- An AWS account
+- AWS CLI installed and configured (`aws configure`) with credentials for an IAM user with sufficient permissions to create VPC, EC2, ELB, Auto Scaling, IAM, CloudWatch, SNS, and CloudFormation resources
+- Git installed
+
+### Option A: Manual deploy via AWS CLI
+1. Clone this repository:
+```bash
+git clone https://github.com/Kashvi09/aws-vpc-architecture.git
+cd aws-vpc-architecture
+```
+
+2. Deploy the CloudFormation stack:
+```bash
+aws cloudformation deploy \
+  --template-file infrastructure/template.yaml \
+  --stack-name vpc-architecture-stack \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
+3. Once complete, retrieve the ALB's DNS name:
+```bash
+aws cloudformation describe-stacks \
+  --stack-name vpc-architecture-stack \
+  --query "Stacks[0].Outputs" \
+  --output table
+```
+
+4. Confirm the SNS email subscription (check your inbox for a confirmation email after deployment).
+
+### Option B: Automated deploy via CI/CD (GitHub Actions)
+1. Fork or clone this repository.
+2. Create an IAM user in your own AWS account with programmatic access and permissions covering VPC, EC2, ELB, Auto Scaling, IAM, CloudWatch, SNS, and CloudFormation.
+3. In your forked repo, go to **Settings → Secrets and variables → Actions**, and add:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+4. Push any change to `infrastructure/template.yaml` on the `main` branch — this automatically triggers `.github/workflows/deploy.yml`, which deploys the stack to your AWS account.
+
+### Testing the deployment
+1. Get the ALB DNS name from the stack Outputs (see step 3 above).
+2. Open it in a browser using `http://` explicitly (the listener is HTTP-only — browsers defaulting to HTTPS will fail to connect).
+3. Confirm the test page loads, showing `Hello from <hostname>`.
+4. Optionally, connect via Systems Manager Session Manager to the EC2 instance to confirm SSM access works without any SSH key.
+
+### Cleanup / Cost avoidance
+To tear down every resource this project creates in one step:
+```bash
+aws cloudformation delete-stack --stack-name vpc-architecture-stack
+```
+
+Confirm it's fully deleted before assuming you're not being charged:
+```bash
+aws cloudformation describe-stacks --stack-name vpc-architecture-stack
+```
+This should return a "stack does not exist" error once deletion completes. Unlike Project 1, several resources here (NAT Gateway, ALB) bill hourly while running — this project is **not** meant to be left running continuously; tear down between sessions unless actively working through a milestone.
+
 ## Milestone Log
 
 Detailed write-ups (why each decision was made, what was built, lessons learned) live in [`/docs/milestones`](./docs/milestones):
@@ -69,8 +128,19 @@ Detailed write-ups (why each decision was made, what was built, lessons learned)
 - [Milestone 8: VPC Flow Logs](./docs/milestones/milestone-8-vpc-flow-logs.md)
 
 ## Known Limitations
-- github-actions-deployer-vpc uses broad managed policies (especially IAMFullAccess, the widest one) rather than scoped custom policies
+- `github-actions-deployer-vpc` uses broad managed policies (including `IAMFullAccess`) rather than scoped custom policies for exact resource ARNs.
+- `ec2-ssm-role` uses the broad AWS-managed `AmazonSSMManagedInstanceCore` policy rather than a scoped custom policy.
+- The ALB listener is HTTP-only — no HTTPS/TLS termination, since no custom domain was set up for this project.
+- No AWS WAF attached to the ALB — the load balancer has no filtering against malicious request patterns (e.g. SQL injection, rate limiting).
+- A single NAT Gateway serves both private subnets — it lives in one AZ (`ap-south-1a`), making it a single point of failure for outbound connectivity if that AZ has an outage.
+- CI/CD authenticates via long-lived static AWS access keys stored as GitHub secrets, rather than short-lived OIDC-federated credentials.
 
 ## Future Improvements
+- Scope `github-actions-deployer-vpc` and `ec2-ssm-role` down to exact resource ARNs, matching the least-privilege pattern already applied to the VPC Flow Logs IAM role.
+- Add HTTPS via an ACM certificate and HTTPS listener on the ALB.
+- Attach AWS WAF to the ALB for request-level filtering.
+- Add a second NAT Gateway in `ap-south-1b` for outbound-path redundancy across both AZs.
+- Migrate CI/CD authentication from static access keys to OIDC federation.
 
 ## Interview Questions & Answers
+A compiled set of technical Q&A covering VPC design, NAT/ALB behavior, Auto Scaling, IaC, CI/CD, and network security decisions made throughout this project → [`docs/interview-questions.md`](./docs/interview-questions.md)
